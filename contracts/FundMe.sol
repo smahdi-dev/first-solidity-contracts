@@ -15,6 +15,12 @@ contract FundMe {
     address[] public funders;
     mapping(address => uint256) public addressToAmountFunded;
 
+    address public owner;
+
+    constructor() {
+        owner = msg.sender;
+    }
+
     function fund() public payable {
         // want to be able to set a minimum fund amount in USD
         // 1. how do we send ETH to these contracts
@@ -27,7 +33,7 @@ contract FundMe {
         // undo any action before, and send remaining gas back
     }
 
-    function withdraw() public {
+    function withdraw() public onlyOwner {
         /* starting point, ending point, step amount */
         for (uint256 funderIndex = 0; funderIndex < funders.length; funderIndex++) {
             address funder = funders[funderIndex];
@@ -38,7 +44,7 @@ contract FundMe {
         funders = new address[](0);
 
         // withdraw the funds
-        // transfer
+        // transfer => throws error
         // payable(msg.sender).transfer(address(this).balance);
 
         // send
@@ -48,5 +54,10 @@ contract FundMe {
         // call
         (bool callSuccess, ) = payable(msg.sender).call{value: address(this).balance}("");
         require(callSuccess, "Call Failed!");
+    }
+
+    modifier onlyOwner {
+        require(msg.sender == owner, "sender is not owner!");
+        _;
     }
 }
