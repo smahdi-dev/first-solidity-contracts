@@ -7,25 +7,33 @@ pragma solidity ^0.8.0;
 
 import "./PriceConverter.sol";
 
+// 756,827 tx gas before using constant
+// 736,882 tx gas after using constant
+// 713,699 tx gas after using immutable
+
 contract FundMe {
     using PriceConverter for uint256;
 
-    uint256 public minimumUsd = 50 * 1e18;
+    uint256 public constant MINIMUM_USD = 50 * 1e18;
+    // 347 gas constant
+    // 2,446 gas non-constant
 
     address[] public funders;
     mapping(address => uint256) public addressToAmountFunded;
 
-    address public owner;
+    address public immutable i_owner;
+    // 439 gas immutable
+    // 2,574 gas non-immutable
 
     constructor() {
-        owner = msg.sender;
+        i_owner = msg.sender;
     }
 
     function fund() public payable {
         // want to be able to set a minimum fund amount in USD
         // 1. how do we send ETH to these contracts
 
-        require(msg.value.getConversionRate() >= minimumUsd, "Didn't send enough!"); // 1e18 == 1 * (10 ** 18)
+        require(msg.value.getConversionRate() >= MINIMUM_USD, "Didn't send enough!"); // 1e18 == 1 * (10 ** 18)
         funders.push(msg.sender);
         addressToAmountFunded[msg.sender] = msg.value;
 
@@ -57,7 +65,7 @@ contract FundMe {
     }
 
     modifier onlyOwner {
-        require(msg.sender == owner, "sender is not owner!");
+        require(msg.sender == i_owner, "sender is not owner!");
         _;
     }
 }
