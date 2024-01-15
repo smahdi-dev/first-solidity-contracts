@@ -11,6 +11,8 @@ import "./PriceConverter.sol";
 // 736,882 tx gas after using constant
 // 713,699 tx gas after using immutable
 
+error NotOwner();
+
 contract FundMe {
     using PriceConverter for uint256;
 
@@ -65,7 +67,8 @@ contract FundMe {
     }
 
     modifier onlyOwner {
-        require(msg.sender == i_owner, "sender is not owner!");
+        // require(msg.sender == i_owner, "sender is not owner!");
+        if(msg.sender != i_owner) { revert NotOwner(); }
         _;
     }
 }
